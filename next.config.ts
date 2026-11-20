@@ -3,7 +3,14 @@ import { resolve } from 'node:path'
 import type { NextConfig } from 'next'
 
 function readEnvExample() {
-  const file = readFileSync(resolve(process.cwd(), '.env.example'), 'utf8')
+  let file: string
+  try {
+    file = readFileSync(resolve(process.cwd(), '.env.example'), 'utf8')
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return {}
+    throw error
+  }
+
   return Object.fromEntries(file.split(/\r?\n/).flatMap(line => {
     const trimmed = line.trim()
     if (!trimmed || trimmed.startsWith('#')) return []
